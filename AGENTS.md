@@ -27,3 +27,6 @@
   MCP interface also require the optional SDK and the real stdio transport test.
 - Maintain upstream references, pinned revisions, license notices and honest
   validation status in the docs. Chinese documentation should use plain wording.
+- Keep the registration guide, agent API docs and client examples discoverable
+  from README. Regenerate interfaces/mcp-tools.json from agent-tools after tool
+  changes and verify it matches runtime discovery. Never generate it with keys.

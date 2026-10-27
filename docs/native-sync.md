@@ -2,6 +2,8 @@
 
 核对日期：2026-10-27。目标是用户告诉 agent“刚跑完”，agent 即时取回新运动、历史对照和恢复背景。
 
+从注册开始的操作见[完整教程](intervals-setup.md)，当前四个 MCP 工具及 JSON／Python 接口见[agent 调用说明](agent-api.md)。
+
 ## 当前选择
 
 **华为手表／手环 → 手机运动健康 → Intervals.icu 原生华为连接 → VitalDock API 查询 → 个人 agent。**

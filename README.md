@@ -6,6 +6,12 @@ VitalDock 为个人 agent 提供按需读取的运动与健康数据接口。当
 
 > Fresh running and recovery context for personal agents. Huawei first.
 
+## 从零开始
+
+- [注册 Intervals.icu、连接华为、获取 API key 并配置 VitalDock](docs/intervals-setup.md)
+- [给 agent 调用的接口：MCP、JSON 命令和 Python](docs/agent-api.md)
+- [MCP 工具参数 JSON](interfaces/mcp-tools.json)、[通用客户端配置](examples/mcp-client.json)、[Codex 配置](examples/codex-mcp.toml)
+
 ## 日常如何使用
 
 一次性连接自己的 Intervals.icu 账号，把 MCP 启动项交给个人 agent。之后直接说：
@@ -24,7 +30,7 @@ agent 调用 `running_context`，获取：
 
 ## 当前版本
 
-**0.2.0：按需 API 查询与个人 agent 接口。** 主流程已从手工副本导入转为原生平台接入。API 接口依据官方 OpenAPI 实现，HTTP 与 MCP 链路使用虚构响应测试；项目所有者尚需在本机录入 API key，完成本人账号联调。
+**0.3.0：完整注册教程与可直接调用的 agent 接口。** 提供连接检查、华为活动列表、独立恢复查询和跑后上下文，覆盖 MCP、JSON 命令和 Python。个人 API 认证、真实活动及 wellness 读取已验证；公开自动测试和示例全部使用虚构数据。跑步比较的真实验收需要相应跑步记录。
 
 [Intervals.icu 官方华为接入指南](https://www.intervals.icu/integrations/huawei/)已提供原生连接。中国大陆账号是否能授权，以自己的实际连接结果为准；已经连接的账号可直接配置 API key。完整路线比较见[原生接入方案](docs/native-sync.md)。
 
@@ -59,7 +65,27 @@ MCP 是 agent 调用工具的通用协议。使用自己的绝对路径配置，
 }
 ```
 
-`--wellness` 授予近期恢复指标，`--streams` 授予跑步的心率等采样序列。省略时不会读取相应类别。接口固定访问 API key 所属本人账号，并只选择来源为 `HUAWEI` 的跑步；不通过它转发 Strava 活动。只使用本地标准输入输出，不开放网络端口，不修改平台数据。
+`--wellness` 授予近期恢复指标，`--streams` 授予跑步的心率等采样序列。省略时不会读取相应类别。接口固定访问 API key 所属本人账号，只返回来源为 `HUAWEI` 的活动；跑后上下文进一步筛选跑步类型。只使用本地标准输入输出，不开放网络端口，不修改平台数据。
+
+agent 可以发现以下工具：
+
+| 工具 | 作用 |
+|---|---|
+| `connection_status` | 验证 API 连接，不返回密钥或具体健康值 |
+| `recent_activities` | 读取华为跑步、通用训练等近期活动 |
+| `wellness_context` | 独立查询近期恢复观测；需要 `--wellness` |
+| `running_context` | 刚跑完时读取本次、历史对照与已授权恢复资料 |
+
+无 MCP 的 agent 也能调用 JSON 命令：
+
+```powershell
+.\.venv\Scripts\vitaldock.exe check-connection --day 2026-10-27
+.\.venv\Scripts\vitaldock.exe recent-activities --day 2026-10-27 --history-days 7 --limit 5
+.\.venv\Scripts\vitaldock.exe wellness-context --day 2026-10-27 --history-days 28
+.\.venv\Scripts\vitaldock.exe agent-tools --wellness
+```
+
+以上日期仅为示例，调用时使用本人当地日期。`agent-tools` 无需密钥或网络；其余命令读取本人的最新 API 数据。完整参数和错误约定见 [agent-api.md](docs/agent-api.md)。
 
 命令行也可直接读取，例如：
 

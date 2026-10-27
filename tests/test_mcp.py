@@ -89,7 +89,8 @@ build_live_server(ArrivingClient()).run(transport="stdio")
                 async with ClientSession(reader, writer) as session:
                     await session.initialize()
                     tools = (await session.list_tools()).tools
-                    self.assertEqual([t.name for t in tools], ["running_context"])
+                    self.assertEqual({t.name for t in tools},
+                                     {"connection_status", "recent_activities", "running_context"})
                     self.assertTrue(tools[0].annotations.readOnlyHint)
                     self.assertTrue(tools[0].annotations.openWorldHint)
                     args = {"day":"2026-10-27", "completed_after":"2026-10-27T15:00:00+08:00"}
@@ -101,3 +102,35 @@ build_live_server(ArrivingClient()).run(transport="stdio")
                     second = json.loads(second.content[0].text)
                     self.assertEqual(second["status"], "run_available")
                     self.assertEqual(second["latest_run"]["activity_id"], "i-new")
+
+    async def test_live_manifest_permissions_and_non_running_tools(self):
+        from test_live import FakeClient, run
+
+        from vitaldock.live_mcp import build_live_server, tool_manifest
+
+        default = await tool_manifest()
+        self.assertNotIn("wellness_context", {t["name"] for t in default["tools"]})
+        full = await tool_manifest(wellness=True)
+        self.assertEqual({t["name"] for t in full["tools"]},
+                         {"connection_status", "recent_activities", "wellness_context", "running_context"})
+        schema = next(t for t in full["tools"] if t["name"] == "recent_activities")["inputSchema"]
+        self.assertEqual(schema["properties"]["history_days"]["maximum"], 90)
+        self.assertEqual(schema["properties"]["limit"]["maximum"], 100)
+        server = build_live_server(FakeClient([run(type="Workout", distance=None)],
+                                   wellness=[{"id":"2026-10-27", "sleepSecs":25000}]), wellness=True)
+        activity = await server.call_tool("recent_activities", {"day":"2026-10-27"})
+        # FastMCP returns (content, structuredContent) when a structured result is available.
+        blocks = activity[0] if isinstance(activity, tuple) else activity
+        payload = json.loads(blocks[0].text)
+        self.assertEqual(payload["activities"][0]["type"], "Workout")
+        wellness = await server.call_tool("wellness_context", {"day":"2026-10-27"})
+        blocks = wellness[0] if isinstance(wellness, tuple) else wellness
+        self.assertEqual(json.loads(blocks[0].text)["status"], "available")
+
+    async def test_published_tool_manifest_matches_runtime(self):
+        from vitaldock.live_mcp import tool_manifest
+
+        path = Path(__file__).resolve().parents[1] / "interfaces/mcp-tools.json"
+        published = json.loads(path.read_text(encoding="utf-8"))
+        current = await tool_manifest(wellness=True, streams=True)
+        self.assertEqual(published, current)

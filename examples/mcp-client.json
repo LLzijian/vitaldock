@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vitaldock-live": {
+      "command": "C:/path/to/vitaldock/.venv/Scripts/python.exe",
+      "args": ["-m", "vitaldock", "mcp-live", "--wellness"]
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "schema_version": "mcp-tools/1",
+  "server": "vitaldock-live",
+  "transport": "stdio",
+  "permissions": {
+    "wellness": true,
+    "streams": true
+  },
+  "tools": [
+    {
+      "name": "connection_status",
+      "description": "Verify authenticated access for local YYYY-MM-DD; no key or health values returned.",
+      "inputSchema": {
+        "properties": {
+          "day": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Day",
+            "type": "string"
+          }
+        },
+        "required": [
+          "day"
+        ],
+        "title": "connection_statusArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "recent_activities",
+      "description": "Fetch Huawei runs and general workouts; day is local YYYY-MM-DD.\n\n        history_days: 1..90. limit: 1..100. Missing distance stays null; workouts are not runs.\n        Each call fetches fresh data. Result truncation is explicit; no GPS or activity names.\n        ",
+      "inputSchema": {
+        "properties": {
+          "day": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Day",
+            "type": "string"
+          },
+          "history_days": {
+            "default": 28,
+            "maximum": 90,
+            "minimum": 1,
+            "title": "History Days",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 20,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day"
+        ],
+        "title": "recent_activitiesArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "wellness_context",
+      "description": "Fetch daily sleep/resting HR/available HRV and prior baseline without needing a run.\n\n            day is local YYYY-MM-DD, history_days: 1..90. Missing data is not zero or a verdict.\n            ",
+      "inputSchema": {
+        "properties": {
+          "day": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Day",
+            "type": "string"
+          },
+          "history_days": {
+            "default": 28,
+            "maximum": 90,
+            "minimum": 1,
+            "title": "History Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day"
+        ],
+        "title": "wellness_contextArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "running_context",
+      "description": "Fetch the latest completed Huawei run, comparable prior run and allowed recovery data.\n\n        day: user's local YYYY-MM-DD. completed_after: recent ISO timestamp with UTC offset.\n        history_days: 1..90. Every invocation performs fresh GET requests; no stale cache.\n        Optional wellness and sampled non-GPS streams are fixed by server startup permissions.\n        ",
+      "inputSchema": {
+        "properties": {
+          "day": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "title": "Day",
+            "type": "string"
+          },
+          "completed_after": {
+            "title": "Completed After",
+            "type": "string"
+          },
+          "history_days": {
+            "default": 28,
+            "maximum": 90,
+            "minimum": 1,
+            "title": "History Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "completed_after"
+        ],
+        "title": "running_contextArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  ]
+}

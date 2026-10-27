@@ -1,5 +1,9 @@
 # Agent 查询约定
 
+注册和本机设置见 [intervals-setup.md](intervals-setup.md)，四个 MCP 工具、JSON 命令、Python 和配置示例见 [agent-api.md](agent-api.md)。本页补充数据与时间语义。
+
+实时工具为 `connection_status`、`recent_activities`、`running_context` 及按授权提供的 `wellness_context`。一般训练可直接查询活动列表，恢复观测也可独立读取，无需伪造一次跑步。
+
 ## 实时跑步工具（当前主流程）
 
 启动 `vitaldock mcp-live --wellness --streams`。读取个人 API key 所属本人账号，筛选来源为 HUAWEI 的跑步；未开启的类别不会调用对应 API。密钥由当前进程环境或系统凭据库读取，工具参数不接收密钥、人员 ID 或任意 URL。

@@ -1,6 +1,7 @@
 """Machine-readable CLI; every successful command produces one JSON document."""
 
 import argparse
+import asyncio
 import getpass
 import json
 import sqlite3
@@ -53,6 +54,18 @@ def parser():
     live_mcp = commands.add_parser("mcp-live", help="run live self-only Intervals.icu GET tools")
     live_mcp.add_argument("--wellness", action="store_true")
     live_mcp.add_argument("--streams", action="store_true")
+    check = commands.add_parser("check-connection", help="verify own API access without health values")
+    check.add_argument("--day", required=True)
+    activities = commands.add_parser("recent-activities", help="read recent Huawei runs and workouts")
+    activities.add_argument("--day", required=True)
+    activities.add_argument("--history-days", type=int, default=28)
+    activities.add_argument("--limit", type=int, default=20)
+    wellness = commands.add_parser("wellness-context", help="read daily recovery context without a run")
+    wellness.add_argument("--day", required=True)
+    wellness.add_argument("--history-days", type=int, default=28)
+    manifest = commands.add_parser("agent-tools", help="print MCP tool JSON schemas without credentials")
+    manifest.add_argument("--wellness", action="store_true")
+    manifest.add_argument("--streams", action="store_true")
     return root
 
 
@@ -129,6 +142,20 @@ def main(argv=None):
                 build_live_server(IntervalsClient(), wellness=arguments.wellness,
                                   streams=arguments.streams).run(transport="stdio")
                 return 0
+            case "check-connection":
+                from vitaldock.api import AgentAPI
+                output = AgentAPI().connection_status(arguments.day)
+            case "recent-activities":
+                from vitaldock.api import AgentAPI
+                output = AgentAPI().recent_activities(arguments.day, arguments.history_days,
+                                                      arguments.limit)
+            case "wellness-context":
+                from vitaldock.api import AgentAPI
+                output = AgentAPI(wellness=True).wellness_context(arguments.day, arguments.history_days)
+            case "agent-tools":
+                from vitaldock.live_mcp import tool_manifest
+                output = asyncio.run(tool_manifest(wellness=arguments.wellness,
+                                                   streams=arguments.streams))
         print(json.dumps(output, ensure_ascii=False, indent=2, allow_nan=False))
         if arguments.command == "import-huawei" and output["status"] != "complete":
             return 2
