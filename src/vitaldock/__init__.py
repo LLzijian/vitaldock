@@ -1,3 +1,3 @@
-"""VitalDock: local health records for personal agents."""
+"""VitalDock: fresh running and recovery context for personal agents."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

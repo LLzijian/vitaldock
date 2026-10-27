@@ -1,6 +1,7 @@
 """Machine-readable CLI; every successful command produces one JSON document."""
 
 import argparse
+import getpass
 import json
 import sqlite3
 import sys
@@ -14,7 +15,7 @@ from vitaldock.store import Vault
 
 
 def parser():
-    root = argparse.ArgumentParser(prog="vitaldock", description="Local health data for agents")
+    root = argparse.ArgumentParser(prog="vitaldock", description="Fresh health context for agents")
     root.add_argument("--version", action="version", version=__version__)
     root.add_argument("--vault", help="private vault directory (default outside source repository)")
     commands = root.add_subparsers(dest="command", required=True)
@@ -42,6 +43,16 @@ def parser():
     mcp.add_argument("--metrics", nargs="+", choices=sorted(METRICS), required=True,
                      help="explicit metric allowlist granted to the connected agent")
     commands.add_parser("guide-huawei", help="show the Huawei acquisition steps")
+    commands.add_parser("connect-intervals", help="verify a hidden key entry and save to OS credentials")
+    live = commands.add_parser("run-context", help="fetch fresh Huawei running context from Intervals.icu")
+    live.add_argument("--day", required=True, help="user's local YYYY-MM-DD")
+    live.add_argument("--completed-after", required=True, help="ISO timestamp with UTC offset")
+    live.add_argument("--history-days", type=int, default=28)
+    live.add_argument("--wellness", action="store_true", help="allow recent daily recovery measurements")
+    live.add_argument("--streams", action="store_true", help="allow sampled non-GPS activity streams")
+    live_mcp = commands.add_parser("mcp-live", help="run live self-only Intervals.icu GET tools")
+    live_mcp.add_argument("--wellness", action="store_true")
+    live_mcp.add_argument("--streams", action="store_true")
     return root
 
 
@@ -77,7 +88,11 @@ def main(argv=None):
                 return 0
             case "guide-huawei":
                 output = {
-                    "region": "China mainland; other Android phone",
+                    "primary_route": "Huawei native connection -> Intervals.icu -> VitalDock live MCP",
+                    "connections": "https://intervals.icu/settings/connections?services=huawei",
+                    "setup": "connect-intervals",
+                    "live_query": "run-context --day YYYY-MM-DD --completed-after ISO_TIMESTAMP",
+                    "archive_fallback_only": {
                     "portal": "https://privacy.consumer.huawei.com/tool?lang=zh-cn",
                     "steps": ["Sync your wearable to Huawei Health and the cloud with your consent.",
                               "Sign in to the official privacy portal yourself.",
@@ -87,7 +102,33 @@ def main(argv=None):
                               "Run inspect, then import-huawei on the decrypted folder."],
                     "notes": ["Huawei estimates about 7 working days.",
                               "Online copies normally cover the past year. Ask Huawei for older data.",
-                              "No Huawei password or developer credentials are needed by VitalDock."]}
+                              "No Huawei password or developer credentials are needed by VitalDock."]}}
+            case "connect-intervals":
+                from datetime import datetime
+
+                from vitaldock.credentials import save_key
+                from vitaldock.intervals import IntervalsClient
+                if not sys.stdin.isatty():
+                    raise ValueError("run connect-intervals yourself in a local interactive terminal")
+                key = getpass.getpass("Intervals.icu personal API key (hidden): ")
+                IntervalsClient(key).activities(datetime.now().astimezone().date().isoformat(), 1)
+                save_key(key)
+                output = {"status": "connected", "account": "authenticated_self",
+                          "credential_storage": "native_os_store", "key_returned": False}
+            case "run-context":
+                from vitaldock.intervals import IntervalsClient
+                from vitaldock.running import post_run_context
+                output = post_run_context(IntervalsClient(), day=arguments.day,
+                                          completed_after=arguments.completed_after,
+                                          history_days=arguments.history_days,
+                                          include_wellness=arguments.wellness,
+                                          include_streams=arguments.streams)
+            case "mcp-live":
+                from vitaldock.intervals import IntervalsClient
+                from vitaldock.live_mcp import build_live_server
+                build_live_server(IntervalsClient(), wellness=arguments.wellness,
+                                  streams=arguments.streams).run(transport="stdio")
+                return 0
         print(json.dumps(output, ensure_ascii=False, indent=2, allow_nan=False))
         if arguments.command == "import-huawei" and output["status"] != "complete":
             return 2
@@ -95,6 +136,7 @@ def main(argv=None):
     except (ValueError, OSError, sqlite3.Error, zipfile.BadZipFile, NotImplementedError) as error:
         # Do not print source payloads or arbitrary vendor values through exceptions.
         message = str(error) if isinstance(error, ValueError) else type(error).__name__
-        print(json.dumps({"error": type(error).__name__, "message": message},
+        print(json.dumps({"error": type(error).__name__, "message": message,
+                          "retry_after_seconds": getattr(error, "retry_after", None)},
                          ensure_ascii=False), file=sys.stderr)
         return 1

@@ -2,6 +2,19 @@
 
 核对日期：2026-10-27。以下区分已核对的官方能力、开源格式参考和项目决策。
 
+## 原生读取路线（0.2）
+
+当前主路线为华为原生连接到 Intervals.icu，再按需访问本人 API。选择依据与 Strava／自建华为应用比较见 [native-sync.md](native-sync.md)。
+
+- [华为原生接入](https://www.intervals.icu/integrations/huawei/)及[维护者公告](https://forum.intervals.icu/t/huawei-support-available/120529)。
+- [官方 OpenAPI](https://intervals.icu/api/v1/docs)：核实本人运动列表、wellness 和 activity streams 的 GET 路径、字段及 `HUAWEI` 来源枚举。本文核对的是 2026-10-27 的在线规范；本地格式化参考摘要 `451e29ef10824ee537625413941842e2fc0ddf22661f5ba8edd57c570526fb15`，不代表上游原始响应字节摘要。
+- [个人 API 与限流](https://forum.intervals.icu/t/api-access-to-intervals-icu/609)、[OAuth／PKCE](https://forum.intervals.icu/t/intervals-icu-oauth-support/2759)、[API 条款](https://forum.intervals.icu/t/intervals-icu-api-terms-and-conditions/114087)。
+- [Strava 2026 API Policy](https://www.strava.com/legal/api_policy)与[官方 MCP FAQ](https://support.strava.com/en-us/articles/15401526-strava-api-and-mcp-faq)：区分普通 API 限制与官方 MCP。
+- [mvilanova/intervals-mcp-server](https://github.com/mvilanova/intervals-mcp-server/tree/cb1fbcac81095cf3e094e995decf04b8b1f259f8)：已有面向 agent 的开源实现，GPL-3.0。查阅工具范围与安装方式，没有复制其代码；VitalDock 的按需跑后上下文与客户端为独立实现。
+- [keyring 官方文档](https://keyring.readthedocs.io/en/latest/)：Windows、macOS 和 Linux 原生密钥服务，不采用明文文件后备。
+
+以下是保留的华为直接接入与历史副本调研。
+
 ## 官方路径
 
 | 路径 | 已核对的信息 | 对 VitalDock 的意义 |

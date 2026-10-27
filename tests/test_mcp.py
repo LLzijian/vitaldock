@@ -57,3 +57,47 @@ class MCPTests(unittest.IsolatedAsyncioTestCase):
                         "record_id": payload["records"][0]["id"]})
                     self.assertFalse(provenance.isError)
             self.assertEqual(digest(vault.database.read_bytes()), before)
+
+    async def test_live_stdio_refetches_and_never_substitutes_an_old_run(self):
+        from mcp import ClientSession, StdioServerParameters
+        from mcp.client.stdio import stdio_client
+
+        with tempfile.TemporaryDirectory() as folder:
+            wrapper = Path(folder) / "live_fixture.py"
+            wrapper.write_text('''
+from test_live import FakeClient, NOW, run
+import vitaldock.running as running
+from vitaldock.live_mcp import build_live_server
+
+original = running.post_run_context
+def at_fixed_time(*args, **kwargs):
+    return original(*args, **kwargs, now=NOW)
+running.post_run_context = at_fixed_time
+
+class ArrivingClient(FakeClient):
+    def activities(self, *args):
+        self.calls.append("activities")
+        return [] if len(self.calls) == 1 else [run()]
+
+build_live_server(ArrivingClient()).run(transport="stdio")
+''', encoding="utf-8")
+            project = Path(__file__).resolve().parents[1]
+            params = StdioServerParameters(command=sys.executable, args=[str(wrapper)], env={
+                "PYTHONPATH": os.pathsep.join([str(project / "src"), str(project / "tests")]),
+                "SYSTEMROOT": os.environ.get("SYSTEMROOT", "")})
+            async with stdio_client(params) as (reader, writer):
+                async with ClientSession(reader, writer) as session:
+                    await session.initialize()
+                    tools = (await session.list_tools()).tools
+                    self.assertEqual([t.name for t in tools], ["running_context"])
+                    self.assertTrue(tools[0].annotations.readOnlyHint)
+                    self.assertTrue(tools[0].annotations.openWorldHint)
+                    args = {"day":"2026-10-27", "completed_after":"2026-10-27T15:00:00+08:00"}
+                    first = await session.call_tool("running_context", args)
+                    first = json.loads(first.content[0].text)
+                    self.assertEqual(first["status"], "awaiting_upstream_sync")
+                    self.assertIsNone(first["latest_run"])
+                    second = await session.call_tool("running_context", args)
+                    second = json.loads(second.content[0].text)
+                    self.assertEqual(second["status"], "run_available")
+                    self.assertEqual(second["latest_run"]["activity_id"], "i-new")

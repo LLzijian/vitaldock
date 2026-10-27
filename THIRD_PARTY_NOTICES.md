@@ -7,6 +7,8 @@ files are vendored. Format compatibility was informed by these projects:
 - christianeirich/huawei-health-to-health-connect, MIT, copyright (c) 2025 Christian Eirich.
 - CTHRU/Hitrava, current NPOSL-3.0; consulted as documentation, no code copied.
 - HMS-Core/hms-health-demo-java, Apache-2.0; consulted as official documentation.
+- mvilanova/intervals-mcp-server, GPL-3.0; read its README for agent integration
+  scope, no code or configuration copied. VitalDock live tools are independent.
 
 Links and exact reference revisions are recorded in [docs/research.md](docs/research.md).
 The following MIT notice is retained for the two format references above:
@@ -36,6 +38,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-The optional `mcp` SDK and development tools are installed as external dependencies,
+The optional `mcp` SDK, `keyring` and development tools are external dependencies,
 not included in this repository. Their respective licenses apply to those packages.
 Huawei and other vendor names refer to data sources and do not imply affiliation.

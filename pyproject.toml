@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vitaldock"
-version = "0.1.0"
-description = "Local, traceable wearable health data for personal agents. Huawei first."
+version = "0.2.0"
+description = "Fresh running and recovery context for personal agents. Huawei first."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -14,6 +14,7 @@ dependencies = []
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.20,<2"]
+live = ["keyring>=25,<26"]
 dev = ["ruff>=0.14,<1"]
 
 [project.scripts]
