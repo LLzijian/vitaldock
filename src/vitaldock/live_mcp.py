@@ -1,5 +1,7 @@
 """Live, self-only running tools backed by current GET requests to Intervals.icu."""
 
+import inspect
+
 
 def build_live_server(client, *, wellness=False, streams=False):
     try:
@@ -33,12 +35,18 @@ def build_live_server(client, *, wellness=False, streams=False):
     annotation = ToolAnnotations(readOnlyHint=True, destructiveHint=False,
                                  idempotentHint=False, openWorldHint=True)
 
-    @server.tool(annotations=annotation)
+    def register(function):
+        # Python 3.13 dedents docstrings earlier than older interpreters. Normalize
+        # before registration so runtime discovery and exported schemas agree.
+        return server.tool(annotations=annotation,
+                           description=inspect.cleandoc(function.__doc__ or ""))(function)
+
+    @register
     def connection_status(day: Day) -> dict:
         """Verify authenticated access for local YYYY-MM-DD; no key or health values returned."""
         return api.connection_status(day)
 
-    @server.tool(annotations=annotation)
+    @register
     def recent_activities(day: Day, history_days: HistoryDays = 28, limit: Limit = 20) -> dict:
         """Fetch Huawei runs and general workouts; day is local YYYY-MM-DD.
 
@@ -48,7 +56,7 @@ def build_live_server(client, *, wellness=False, streams=False):
         return api.recent_activities(day, history_days, limit)
 
     if wellness:
-        @server.tool(annotations=annotation)
+        @register
         def wellness_context(day: Day, history_days: HistoryDays = 28) -> dict:
             """Fetch daily sleep/resting HR/available HRV and prior baseline without needing a run.
 
@@ -56,7 +64,7 @@ def build_live_server(client, *, wellness=False, streams=False):
             """
             return api.wellness_context(day, history_days)
 
-    @server.tool(annotations=annotation)
+    @register
     def running_context(day: Day, completed_after: str, history_days: HistoryDays = 28) -> dict:
         """Fetch the latest completed Huawei run, comparable prior run and allowed recovery data.
 
