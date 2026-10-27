@@ -1,0 +1,26 @@
+[
+  {
+    "recordDay": 20261025,
+    "sportDataUserData": [
+      {
+        "startTime": 1792886400000,
+        "endTime": 1792886520000,
+        "timeZone": "+0800",
+        "deviceCode": 999001,
+        "sportType": 5,
+        "sportBasicInfos": [
+          {
+            "steps": 12,
+            "distance": 8,
+            "calorie": 20
+          },
+          {
+            "steps": 15,
+            "distance": 10,
+            "calorie": 25
+          }
+        ]
+      }
+    ]
+  }
+]

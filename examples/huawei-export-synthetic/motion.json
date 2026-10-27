@@ -1,0 +1,15 @@
+[
+  {
+    "recordDay": 20261025,
+    "motionPathData": [
+      {
+        "startTime": 1792890000000,
+        "endTime": 1792891800000,
+        "timeZone": "+0800",
+        "deviceCode": 999001,
+        "sportType": 2,
+        "attribute": "SYNTHETIC_TRACK_PLACEHOLDER_NO_REAL_COORDINATES"
+      }
+    ]
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "type": 7,
+    "deviceCode": 999001,
+    "timeZone": "+0800",
+    "samplePoints": [
+      {
+        "key": "DATA_POINT_DYNAMIC_HEARTRATE",
+        "value": "72",
+        "startTime": 1792886400000,
+        "endTime": 1792886460000,
+        "unit": "0"
+      },
+      {
+        "key": "DATA_POINT_DYNAMIC_HEARTRATE",
+        "value": "75",
+        "startTime": 1792886460000,
+        "endTime": 1792886520000,
+        "unit": "0"
+      },
+      {
+        "key": "DATA_POINT_REST_HEARTRATE",
+        "value": "61",
+        "startTime": 1792886400000,
+        "endTime": 1792886460000,
+        "unit": "0"
+      },
+      {
+        "key": "BLOOD_OXYGEN_SATURATION",
+        "value": "98",
+        "startTime": 1792886400000,
+        "endTime": 1792886460000,
+        "unit": "0"
+      },
+      {
+        "key": "WEIGHT_BODYFAT_BROAD",
+        "value": "{\"bodyWeight\": 68.5, \"bodyFatRate\": 19.5}",
+        "startTime": 1792886400000,
+        "endTime": 1792886400000,
+        "unit": "0"
+      },
+      {
+        "key": "PROFESSIONAL_SLEEP_DEEP",
+        "value": "",
+        "startTime": 1792864800000,
+        "endTime": 1792868400000,
+        "unit": "0"
+      },
+      {
+        "key": "PROFESSIONAL_SLEEP_SHALLOW",
+        "value": "",
+        "startTime": 1792868400000,
+        "endTime": 1792872000000,
+        "unit": "0"
+      },
+      {
+        "key": "PROFESSIONAL_SLEEP_DREAM",
+        "value": "",
+        "startTime": 1792872000000,
+        "endTime": 1792875600000,
+        "unit": "0"
+      }
+    ]
+  }
+]
