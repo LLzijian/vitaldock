@@ -23,6 +23,14 @@
 - Exports use Unix milliseconds; official REST examples use nanoseconds. Keep
   adapters separate and verify the actual schema before adding a connector.
 - Do not describe a planned or mock connector as working live synchronization.
+- Health Connect uses its own Android SDK adapter and authenticated USB loopback,
+  separate from Huawei/Intervals. Query only startup-granted metric categories,
+  preserve origin packages and pagination, and never add overlapping raw sources.
+  No GPS, notes, titles or Strava-origin records. Permission dialogs belong to the user.
+  Do not claim a fresh phone database read forces a source app or wearable to sync.
+- Android changes require testDebugUnitTest, assembleDebug and lintDebug. Keep
+  native health read permissions, localhost-only binding and fail-closed pairing.
+  Preserve null/empty distinctions and report sampling and partial pages explicitly.
 - Run `python -m unittest discover -s tests -v` and `ruff check .`. Changes to the
   MCP interface also require the optional SDK and the real stdio transport test.
 - Maintain upstream references, pinned revisions, license notices and honest

@@ -4,6 +4,8 @@
 
 VitalDock 为个人 agent 提供按需读取的运动与健康数据接口。当前主路线是 **华为运动健康原生连接 → Intervals.icu → VitalDock → agent**，每次查询都访问 API，返回最新可用跑步、历史比较和近期恢复指标。
 
+安卓用户也可以使用 **Health Connect → VitalDock 手机端 → USB → agent**，按授权读取心率采样、睡眠分期、血氧、HRV 等原始记录。每次调用重新查询手机数据库，保留记录来源，不需要手工导出。
+
 > Fresh running and recovery context for personal agents. Huawei first.
 
 ## 从零开始
@@ -31,7 +33,7 @@ agent 调用 `running_context`，获取：
 
 ## 当前版本
 
-**0.3.0：完整注册教程与可直接调用的 agent 接口。** 提供连接检查、华为活动列表、独立恢复查询和跑后上下文，覆盖 MCP、JSON 命令和 Python。个人 API 认证、真实活动及 wellness 读取已验证；公开自动测试和示例全部使用虚构数据。跑步比较的真实验收需要相应跑步记录。
+**0.4.0：增加安卓 Health Connect 的只读 USB 接口。** 手机端支持 13 类健康记录，电脑端通过 MCP、JSON 命令和 Python 按需读取；提供连接检查、记录存在性检查、分页和指标范围控制。已有 Intervals.icu 运动与恢复接口继续使用。真实数据范围以本人手机授权和源应用实际写入为准，验证范围见[验证记录](docs/validation.md)。
 
 [Intervals.icu 官方华为接入指南](https://www.intervals.icu/integrations/huawei/)已提供原生连接。中国大陆账号是否能授权，以自己的实际连接结果为准；已经连接的账号可直接配置 API key。完整路线比较见[原生接入方案](docs/native-sync.md)。
 

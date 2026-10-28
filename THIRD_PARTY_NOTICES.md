@@ -41,3 +41,10 @@ SOFTWARE.
 The optional `mcp` SDK, `keyring` and development tools are external dependencies,
 not included in this repository. Their respective licenses apply to those packages.
 Huawei and other vendor names refer to data sources and do not imply affiliation.
+
+The Android companion uses AndroidX Activity/Lifecycle and Health Connect 1.1.0
+(Apache-2.0), Kotlin and kotlinx.coroutines (Apache-2.0), and NanoHTTPD 2.3.1
+(BSD-3-Clause). They are resolved by Gradle; their respective licenses apply to
+compiled distributions. Android builds do not contain health data or pairing keys.
+The companion and USB client are independently implemented from the official SDK
+documentation; no third-party Health Connect bridge source is copied.
