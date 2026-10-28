@@ -24,3 +24,7 @@ exports/
 *.key
 *.log
 .DS_Store
+.gradle/
+local.properties
+*.apk
+*.jks
