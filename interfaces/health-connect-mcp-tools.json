@@ -1,0 +1,118 @@
+{
+  "schema_version": "mcp-tools/1",
+  "server": "vitaldock-health-connect",
+  "transport": "stdio",
+  "metrics": [
+    "active_energy",
+    "body_fat",
+    "body_temperature",
+    "distance",
+    "heart_rate",
+    "hrv_rmssd",
+    "respiratory_rate",
+    "resting_heart_rate",
+    "sleep",
+    "spo2",
+    "steps",
+    "total_energy",
+    "weight"
+  ],
+  "tools": [
+    {
+      "name": "health_connect_status",
+      "description": "Check phone reachability and current health permissions without measurement values.",
+      "inputSchema": {
+        "properties": {},
+        "title": "health_connect_statusArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "health_connect_coverage",
+      "description": "Check presence of allowed metrics, using offset timestamps and a window of at most 7 days.",
+      "inputSchema": {
+        "properties": {
+          "since": {
+            "title": "Since",
+            "type": "string"
+          },
+          "until": {
+            "title": "Until",
+            "type": "string"
+          }
+        },
+        "required": [
+          "since",
+          "until"
+        ],
+        "title": "health_connect_coverageArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "health_connect_records",
+      "description": "Read one page of allowed raw records with source attribution; never sum across sources.\n\nsince inclusive, until exclusive: ISO timestamps with UTC offsets; at most 7 days.\nlimit 1..200 records. Use next_page_token with the same query to continue.",
+      "inputSchema": {
+        "properties": {
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "since": {
+            "title": "Since",
+            "type": "string"
+          },
+          "until": {
+            "title": "Until",
+            "type": "string"
+          },
+          "limit": {
+            "default": 100,
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cursor"
+          }
+        },
+        "required": [
+          "metric",
+          "since",
+          "until"
+        ],
+        "title": "health_connect_recordsArguments",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  ]
+}

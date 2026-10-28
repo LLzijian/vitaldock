@@ -66,6 +66,23 @@ def parser():
     manifest = commands.add_parser("agent-tools", help="print MCP tool JSON schemas without credentials")
     manifest.add_argument("--wellness", action="store_true")
     manifest.add_argument("--streams", action="store_true")
+    from vitaldock.health_connect import METRICS as PHONE_METRICS
+    phone_pair = commands.add_parser("connect-health-connect", help="pair local phone read access")
+    phone_pair.add_argument("--adb", help="adb executable; pair from this app's visible screen")
+    commands.add_parser("health-connect-status", help="check phone permissions over USB")
+    phone_coverage = commands.add_parser("health-connect-coverage", help="check phone metric presence")
+    phone_records = commands.add_parser("health-connect-records", help="read one phone records page")
+    for command in (phone_coverage, phone_records):
+        command.add_argument("--since", required=True)
+        command.add_argument("--until", required=True)
+    phone_coverage.add_argument("--metrics", nargs="+", choices=sorted(PHONE_METRICS),
+                                default=sorted(PHONE_METRICS))
+    phone_records.add_argument("--metric", choices=sorted(PHONE_METRICS), required=True)
+    phone_records.add_argument("--limit", type=int, default=100)
+    phone_records.add_argument("--cursor")
+    phone_mcp = commands.add_parser("mcp-health-connect", help="metric-scoped read-only phone MCP")
+    phone_mcp.add_argument("--metrics", nargs="+", choices=sorted(PHONE_METRICS), required=True)
+    commands.add_parser("health-connect-tools", help="discover phone MCP tools without credentials")
     return root
 
 
@@ -156,6 +173,36 @@ def main(argv=None):
                 from vitaldock.live_mcp import tool_manifest
                 output = asyncio.run(tool_manifest(wellness=arguments.wellness,
                                                    streams=arguments.streams))
+            case "connect-health-connect":
+                from vitaldock.health_connect import HealthConnectClient, pair_usb, save_token
+                if arguments.adb:
+                    output = pair_usb(arguments.adb)
+                else:
+                    if not sys.stdin.isatty():
+                        raise ValueError("run connect-health-connect yourself in a local terminal")
+                    token = getpass.getpass("VitalDock phone pairing token (hidden): ")
+                    output = HealthConnectClient(token).status()
+                    save_token(token)
+                output["credential_storage"] = "native_os_store"
+                output["token_returned"] = False
+            case "health-connect-status" | "health-connect-coverage" | "health-connect-records":
+                from vitaldock.health_connect import HealthConnectClient
+                phone = HealthConnectClient()
+                if arguments.command == "health-connect-status":
+                    output = phone.status()
+                elif arguments.command == "health-connect-coverage":
+                    output = phone.coverage(arguments.since, arguments.until, arguments.metrics)
+                else:
+                    output = phone.records(arguments.metric, arguments.since, arguments.until,
+                                           arguments.limit, arguments.cursor)
+            case "mcp-health-connect":
+                from vitaldock.health_connect import HealthConnectClient
+                from vitaldock.health_connect_mcp import build_server
+                build_server(HealthConnectClient(), arguments.metrics).run(transport="stdio")
+                return 0
+            case "health-connect-tools":
+                from vitaldock.health_connect_mcp import tool_manifest
+                output = asyncio.run(tool_manifest())
         print(json.dumps(output, ensure_ascii=False, indent=2, allow_nan=False))
         if arguments.command == "import-huawei" and output["status"] != "complete":
             return 2

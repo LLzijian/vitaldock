@@ -10,6 +10,7 @@ VitalDock 为个人 agent 提供按需读取的运动与健康数据接口。当
 
 - [注册 Intervals.icu、连接华为、获取 API key 并配置 VitalDock](docs/intervals-setup.md)
 - [给 agent 调用的接口：MCP、JSON 命令和 Python](docs/agent-api.md)
+- [安卓 Health Connect：手机授权、USB 连接与 agent 查询](docs/health-connect-setup.md)
 - [MCP 工具参数 JSON](interfaces/mcp-tools.json)、[通用客户端配置](examples/mcp-client.json)、[Codex 配置](examples/codex-mcp.toml)
 
 ## 日常如何使用
